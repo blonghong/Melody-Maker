@@ -240,6 +240,8 @@ Public Class Form1
             Exit Sub
         End If
         lst_obstacles.SelectedIndex = -1
+        ' for some reason this isnt happenning automatically, even though it SHOULD be...? will have to look into it.
+        pnl_oeditor.Visible = False
 
         If lst_intensities.SelectedIndices.Count > 1 Then
             pnl_ieditor.Visible = False
@@ -290,6 +292,8 @@ Public Class Form1
             Exit Sub
         End If
         lst_intensities.SelectedIndex = -1
+        ' for some reason this isnt happenning automatically, even though it SHOULD be...? will have to look into it.
+        pnl_ieditor.Visible = False
 
         If lst_obstacles.SelectedIndices.Count > 1 Then
             pnl_oeditor.Visible = False
@@ -516,17 +520,25 @@ Public Class Form1
             Exit Sub
         End If
 
-        Dim num = InputBox("How many qbeats do you want? (4 for every beat)")
+        '1238
+        Dim length = InputBox("How many qbeats is this beat playing for? 4 is 1 beat.")
+        If String.IsNullOrWhiteSpace(length) Then Exit Sub
+        Dim num = InputBox("How many obstacles do you want? (make this the same as before for a qbeat pattern)")
+        If String.IsNullOrWhiteSpace(num) Then Exit Sub
         Dim start = InputBox("When should it start? (In samples)")
-        Dim pattern = InputBox("Pattern?")
+        If String.IsNullOrWhiteSpace(start) Then Exit Sub
+        Dim pattern = InputBox("Pattern? Blank = Cancel, Default is 4")
+        If String.IsNullOrWhiteSpace(pattern) Then Exit Sub
 
         If String.IsNullOrWhiteSpace(pattern) Then pattern = "4"
+
+        Dim beat_dist = length / num * QuarterBeat()
 
         Dim pi = 0
         For i = 0 To num - 1
             Dim o As New MelodyObstacle With {
                 .type = pattern(pi),
-                .time = start + QuarterBeat() * i,
+                .time = start + beat_dist * i,
                 .duration = -1
             }
             track.obstacles.Add(o)
