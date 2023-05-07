@@ -77,17 +77,18 @@ Partial Class Form1
         Me.ToolsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_add_beat = New System.Windows.Forms.ToolStripMenuItem()
         Me.menu_add_intensity = New System.Windows.Forms.ToolStripMenuItem()
+        Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
-        Me.AxWindowsMediaPlayer1 = New AxWMPLib.AxWindowsMediaPlayer()
         Me.btn_LoadAudio = New System.Windows.Forms.Button()
         Me.txt_audio_samples = New System.Windows.Forms.TextBox()
         Me.Label11 = New System.Windows.Forms.Label()
         Me.btn_audio_stop = New System.Windows.Forms.Button()
-        Me.lst_obstacles = New Melody_s_Maker.ListBoxColour()
-        Me.lst_intensities = New Melody_s_Maker.ListBoxColour()
+        Me.AxWindowsMediaPlayer1 = New AxWMPLib.AxWindowsMediaPlayer()
+        Me.lst_obstacles = New Melody_s_Maker.MelodyListBox()
+        Me.lst_intensities = New Melody_s_Maker.MelodyListBox()
         Me.pnl_ieditor.SuspendLayout()
         CType(Me.num_idur, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_itime, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -453,7 +454,7 @@ Partial Class Form1
         '
         'MenuStrip1
         '
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.EditToolStripMenuItem, Me.ToolsToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.EditToolStripMenuItem, Me.ToolsToolStripMenuItem, Me.TestToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
         Me.MenuStrip1.Size = New System.Drawing.Size(800, 24)
@@ -536,7 +537,7 @@ Partial Class Form1
         '
         Me.UndoToolStripMenuItem.Name = "UndoToolStripMenuItem"
         Me.UndoToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
-        Me.UndoToolStripMenuItem.Size = New System.Drawing.Size(174, 22)
+        Me.UndoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.UndoToolStripMenuItem.Text = "Undo"
         '
         'RedoToolStripMenuItem
@@ -544,7 +545,7 @@ Partial Class Form1
         Me.RedoToolStripMenuItem.Name = "RedoToolStripMenuItem"
         Me.RedoToolStripMenuItem.ShortcutKeys = CType(((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Shift) _
             Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
-        Me.RedoToolStripMenuItem.Size = New System.Drawing.Size(174, 22)
+        Me.RedoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
         Me.RedoToolStripMenuItem.Text = "Redo"
         '
         'ToolsToolStripMenuItem
@@ -565,6 +566,12 @@ Partial Class Form1
         Me.menu_add_intensity.Name = "menu_add_intensity"
         Me.menu_add_intensity.Size = New System.Drawing.Size(147, 22)
         Me.menu_add_intensity.Text = "Intensity"
+        '
+        'TestToolStripMenuItem
+        '
+        Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
+        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(38, 20)
+        Me.TestToolStripMenuItem.Text = "test"
         '
         'Label7
         '
@@ -602,17 +609,6 @@ Partial Class Form1
         Me.Label10.TabIndex = 23
         Me.Label10.Text = "Tempo"
         '
-        'AxWindowsMediaPlayer1
-        '
-        Me.AxWindowsMediaPlayer1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.AxWindowsMediaPlayer1.Enabled = True
-        Me.AxWindowsMediaPlayer1.Location = New System.Drawing.Point(544, 22)
-        Me.AxWindowsMediaPlayer1.Name = "AxWindowsMediaPlayer1"
-        Me.AxWindowsMediaPlayer1.OcxState = CType(resources.GetObject("AxWindowsMediaPlayer1.OcxState"), System.Windows.Forms.AxHost.State)
-        Me.AxWindowsMediaPlayer1.Size = New System.Drawing.Size(244, 45)
-        Me.AxWindowsMediaPlayer1.TabIndex = 24
-        '
         'btn_LoadAudio
         '
         Me.btn_LoadAudio.Location = New System.Drawing.Point(288, 42)
@@ -648,6 +644,17 @@ Partial Class Form1
         Me.btn_audio_stop.Text = "Stop"
         Me.btn_audio_stop.UseVisualStyleBackColor = True
         '
+        'AxWindowsMediaPlayer1
+        '
+        Me.AxWindowsMediaPlayer1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.AxWindowsMediaPlayer1.Enabled = True
+        Me.AxWindowsMediaPlayer1.Location = New System.Drawing.Point(544, 22)
+        Me.AxWindowsMediaPlayer1.Name = "AxWindowsMediaPlayer1"
+        Me.AxWindowsMediaPlayer1.OcxState = CType(resources.GetObject("AxWindowsMediaPlayer1.OcxState"), System.Windows.Forms.AxHost.State)
+        Me.AxWindowsMediaPlayer1.Size = New System.Drawing.Size(244, 45)
+        Me.AxWindowsMediaPlayer1.TabIndex = 24
+        '
         'lst_obstacles
         '
         Me.lst_obstacles.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
@@ -655,7 +662,9 @@ Partial Class Form1
         Me.lst_obstacles.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_obstacles.FormattingEnabled = True
         Me.lst_obstacles.IntegralHeight = False
+        Me.lst_obstacles.ListBoxMode = Melody_s_Maker.MelodyListBox.MelodyListBoxMode.Obstacle
         Me.lst_obstacles.Location = New System.Drawing.Point(175, 70)
+        Me.lst_obstacles.MelodyTrack = Nothing
         Me.lst_obstacles.Name = "lst_obstacles"
         Me.lst_obstacles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
         Me.lst_obstacles.Size = New System.Drawing.Size(170, 368)
@@ -668,7 +677,9 @@ Partial Class Form1
         Me.lst_intensities.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_intensities.FormattingEnabled = True
         Me.lst_intensities.IntegralHeight = False
+        Me.lst_intensities.ListBoxMode = Melody_s_Maker.MelodyListBox.MelodyListBoxMode.Intensity
         Me.lst_intensities.Location = New System.Drawing.Point(12, 70)
+        Me.lst_intensities.MelodyTrack = Nothing
         Me.lst_intensities.Name = "lst_intensities"
         Me.lst_intensities.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
         Me.lst_intensities.Size = New System.Drawing.Size(157, 368)
@@ -723,8 +734,8 @@ Partial Class Form1
     Friend WithEvents txt_dur As TextBox
     Friend WithEvents txt_bpm As TextBox
     Friend WithEvents chk_34 As CheckBox
-    Friend WithEvents lst_intensities As ListBoxColour
-    Friend WithEvents lst_obstacles As ListBoxColour
+    Friend WithEvents lst_intensities As MelodyListBox
+    Friend WithEvents lst_obstacles As MelodyListBox
     Friend WithEvents pnl_ieditor As Panel
     Friend WithEvents pnl_oeditor As Panel
     Friend WithEvents cmb_itype As ComboBox
@@ -783,4 +794,5 @@ Partial Class Form1
     Friend WithEvents txt_audio_samples As TextBox
     Friend WithEvents Label11 As Label
     Friend WithEvents btn_audio_stop As Button
+    Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
 End Class

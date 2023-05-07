@@ -80,7 +80,8 @@
       <DependentUpon>Form1.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="ListBoxColour.vb">
+    <Compile Include="HistoryManager.vb" />
+    <Compile Include="MelodyListBox.vb">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MelodyTack.vb" />

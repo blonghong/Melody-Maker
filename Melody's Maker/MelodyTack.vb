@@ -2,10 +2,8 @@
 
     Public Class MelodyTrack
         Public Sub New()
-            intensities = New List(Of MelodyIntensity)
-            obstacles = New List(Of MelodyObstacle)
+            ParseNew()
         End Sub
-
         Property version As String
         Property samples As Integer
         Property duration As Decimal
@@ -34,17 +32,36 @@
             intensities.Sort(Function(x, y) x.time.CompareTo(y.time))
             obstacles.Sort(Function(x, y) x.time.CompareTo(y.time))
         End Sub
-
-        Shared Function Parse(data As String) As MelodyTrack
-            Dim track As New MelodyTrack
-
+        Public Sub ParseNew()
+            version = "1.13"
+            samples = 0
+            duration = 0
+            tempo = 0
+            is_3_4 = False
+            intensities = New List(Of MelodyIntensity)
+            obstacles = New List(Of MelodyObstacle)
+        End Sub
+        Public Sub SetTo(obj As MelodyTrack)
+            version = obj.version
+            samples = obj.samples
+            duration = obj.duration
+            tempo = obj.tempo
+            is_3_4 = obj.is_3_4
+            intensities = New List(Of MelodyIntensity)(obj.intensities.Select(Function(a) a.Clone()))
+            obstacles = New List(Of MelodyObstacle)(obj.obstacles.Select(Function(a) a.Clone()))
+        End Sub
+        Public Sub Parse(data As String)
             Dim lines = data.Split(vbNewLine)
-            track.version = lines(0).Trim()
             Dim info = lines(1).Split(";")
-            track.samples = info(0).Trim()
-            track.duration = info(1).Trim()
-            track.tempo = info(2).Trim()
-            track.is_3_4 = info(3).Trim() = "1"
+
+            version = lines(0).Trim()
+            samples = info(0).Trim()
+            duration = info(1).Trim()
+            tempo = info(2).Trim()
+            is_3_4 = info(3).Trim() = "1"
+
+            intensities.Clear()
+            obstacles.Clear()
 
             ' intensities
             For Each intensity As String In lines(2).Split(";")
@@ -52,14 +69,14 @@
                 Dim idata = intensity.Trim().Split(":")
                 Dim timedur = idata(1).Split("-")
                 Dim i As New MelodyIntensity With {
-                    .type = idata(0),
+                    .type = idata(0)(0), 'get the first char of the type, game only uses this.
                     .time = timedur(0),
                     .trans_duration = timedur(1),
                     .has_a = If(timedur.Length > 2, timedur(2), "")
                 }
-                track.intensities.Add(i)
+                intensities.Add(i)
             Next
-            track.intensities.Sort(Function(x, y) x.time.CompareTo(y.time))
+            intensities.Sort(Function(x, y) x.time.CompareTo(y.time))
 
             ' obstacles
             For Each obstacle As String In lines(3).Split(";")
@@ -68,15 +85,13 @@
                 Dim splits = odata(1).Split("-")
                 Dim o As New MelodyObstacle With {
                     .time = odata(0),
-                    .type = splits(0),
+                    .type = splits(0)(0), 'get the first char of the type, game only uses this.
                     .duration = If(splits.Length > 1, splits(1), -1)
                 }
-                track.obstacles.Add(o)
+                obstacles.Add(o)
             Next
-            track.obstacles.Sort(Function(x, y) x.time.CompareTo(y.time))
-
-            Return track
-        End Function
+            obstacles.Sort(Function(x, y) x.time.CompareTo(y.time))
+        End Sub
 
         Public Function Clone() As MelodyTrack
             Dim i As New List(Of MelodyIntensity)(intensities.Select(Function(a) a.Clone()))
@@ -90,6 +105,12 @@
                 .intensities = i,
                 .obstacles = o
             }
+        End Function
+
+        Public Function GetIntensityGroup(o As MelodyObstacle) As MelodyIntensity
+            If intensities.Count = 0 Then Return Nothing
+            Dim ints = intensities.Where(Function(x) x.time < o.time)
+            Return ints.OrderByDescending(Function(x) x.time).FirstOrDefault()
         End Function
 
     End Class
@@ -107,7 +128,7 @@
             Return String.Format("{0}:{1}-{2}{3};", type, time, trans_duration, If(Not String.IsNullOrWhiteSpace(has_a), String.Format("-{0}", has_a), ""))
         End Function
 
-        Public Function GetColour()
+        Public Function GetColour() As Color
             'these are based on in-game colours
             Select Case type
                 Case "L"
@@ -154,31 +175,36 @@
 
     End Class
     Public Class MelodyObstacle
-        Public Shared TypeEnum As New Dictionary(Of String, String) From {
-            {"8", "Up"},
-            {"2", "Down"},
-            {"4", "Left"},
-            {"6", "Right"},
-            {"Up", "Up_Special"},
-            {"Down", "Down_Special"},
-            {"Left", "Left_Special"},
-            {"Right", "Right_Special"}
+
+        Public Shared ObstacleType As New Dictionary(Of String, String) From {
+            {"2", "Color Down"},
+            {"4", "Color Left"},
+            {"6", "Color Right"},
+            {"8", "Color Up"},
+                              _
+            {"D", "Direction Down"},
+            {"L", "Direction Left"},
+            {"R", "Direction Right"},
+            {"U", "Direction Up"}
         }
+        Public Shared Function ObstacleType_GetKey(value As String) As String
+            Dim i = ObstacleType.Values.ToList().IndexOf(value)
+            If i <> -1 Then Return ObstacleType.Keys(i)
+            Return Nothing
+        End Function
+
+
         Property type As String
         Property time As Integer
         Property duration As Integer '-1 = no duration
         Public Shared Function ValidateNiceType(s As String)
-            If TypeEnum.Keys.Contains(s) Then
-                Return TypeEnum.Item(s)
-            End If
+            If ObstacleType.Keys.Contains(s) Then Return ObstacleType.Item(s)
             Return s
         End Function
         Public Shared Function ValidateType(s As String)
-            Dim i = TypeEnum.Values.ToList().IndexOf(s)
-            If i <> -1 Then
-                Return TypeEnum.Keys(i)
-            End If
-            Return s
+            Dim type = ObstacleType_GetKey(s)
+            If String.IsNullOrWhiteSpace(type) Then Return s
+            Return type
         End Function
         Public Function ToNiceString() As String
             Return String.Format("{0}: {1}{2}", time, ValidateNiceType(type),
