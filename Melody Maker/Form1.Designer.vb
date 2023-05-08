@@ -87,8 +87,8 @@ Partial Class Form1
         Me.Label11 = New System.Windows.Forms.Label()
         Me.btn_audio_stop = New System.Windows.Forms.Button()
         Me.AxWindowsMediaPlayer1 = New AxWMPLib.AxWindowsMediaPlayer()
-        Me.lst_obstacles = New Melody_s_Maker.MelodyListBox()
-        Me.lst_intensities = New Melody_s_Maker.MelodyListBox()
+        Me.lst_obstacles = New Melody_Maker.MelodyListBox()
+        Me.lst_intensities = New Melody_Maker.MelodyListBox()
         Me.pnl_ieditor.SuspendLayout()
         CType(Me.num_idur, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_itime, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -662,7 +662,7 @@ Partial Class Form1
         Me.lst_obstacles.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_obstacles.FormattingEnabled = True
         Me.lst_obstacles.IntegralHeight = False
-        Me.lst_obstacles.ListBoxMode = Melody_s_Maker.MelodyListBox.MelodyListBoxMode.Obstacle
+        Me.lst_obstacles.ListBoxMode = Melody_Maker.MelodyListBox.MelodyListBoxMode.Obstacle
         Me.lst_obstacles.Location = New System.Drawing.Point(175, 70)
         Me.lst_obstacles.MelodyTrack = Nothing
         Me.lst_obstacles.Name = "lst_obstacles"
@@ -677,7 +677,7 @@ Partial Class Form1
         Me.lst_intensities.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_intensities.FormattingEnabled = True
         Me.lst_intensities.IntegralHeight = False
-        Me.lst_intensities.ListBoxMode = Melody_s_Maker.MelodyListBox.MelodyListBoxMode.Intensity
+        Me.lst_intensities.ListBoxMode = Melody_Maker.MelodyListBox.MelodyListBoxMode.Intensity
         Me.lst_intensities.Location = New System.Drawing.Point(12, 70)
         Me.lst_intensities.MelodyTrack = Nothing
         Me.lst_intensities.Name = "lst_intensities"
