@@ -1,5 +1,5 @@
 ﻿Imports System.IO
-
+Imports System.Environment
 Public Class Form1
     Private ReadOnly TRACK As New MelodyTrack()
     Private ReadOnly HISTORY As New HistoryManager(Of MelodyTrack)(TRACK)
@@ -9,6 +9,14 @@ Public Class Form1
     Private ReadOnly DIALOG_OPEN As New OpenFileDialog With {.Title = "Open ME2 TRACK Cache File", .Filter = "ME2 TRACK Cache Files|*.txt"}
 
     Public Const SAMPLES_PER_SECOND = 44100 / 1024
+    Protected Overrides ReadOnly Property CreateParams() As CreateParams
+        ' Seems to reduce draw flickering
+        Get
+            Dim cp As CreateParams = MyBase.CreateParams
+            cp.ExStyle = cp.ExStyle Or &H2000000
+            Return cp
+        End Get
+    End Property
     Public Sub UNDO()
         HISTORY.Undo(TRACK.Clone())
         PopulateData()
@@ -27,40 +35,29 @@ Public Class Form1
         Return samples / SAMPLES_PER_SECOND
     End Function
     Function QBeat() As Decimal
-        Return 60 / TRACK.tempo * SAMPLES_PER_SECOND
+        Return 60 / TRACK.Tempo * SAMPLES_PER_SECOND
     End Function
 
-    Dim rnd As New Random
-    Public Function RandomColor() As Color
-        Return Color.FromArgb(255, rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255))
-    End Function
-    ' Help reduce jittering/flickering in the form
-    Protected Overrides ReadOnly Property CreateParams() As CreateParams
-        Get
-            Dim cp As CreateParams = MyBase.CreateParams
-            cp.ExStyle = cp.ExStyle Or &H2000000
-            Return cp
-        End Get
-    End Property
-    Sub set_types()
+    Sub PopulateComboBoxTypes()
+        Dim itypes = IntensityType.Select(Function(i) i.Value).ToArray()
+        Dim otypes = ObstacleType.Select(Function(o) o.Value).ToArray()
+
         cmb_itype.Items.Clear()
-        For Each itype In MelodyIntensity.TypeEnum
-            cmb_itype.Items.Add(itype.Value)
-        Next
-
+        cmb_itypefrom.Items.Clear()
         cmb_otype.Items.Clear()
-        For Each otype In MelodyObstacle.ObstacleType
-            cmb_otype.Items.Add(otype.Value)
-        Next
+
+        cmb_itype.Items.AddRange(itypes)
+        cmb_itypefrom.Items.AddRange(itypes)
+        cmb_otype.Items.AddRange(otypes)
     End Sub
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Application.CurrentCulture = New Globalization.CultureInfo("EN-US")
+        Application.CurrentCulture = Globalization.CultureInfo.InvariantCulture
 
-        Me.SetStyle(ControlStyles.OptimizedDoubleBuffer Or ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint, True)
-        DoubleBuffered = True
-        pnl_oeditor.Location = pnl_ieditor.Location
-        set_recent_files()
-        set_types()
+        SetStyle(ControlStyles.OptimizedDoubleBuffer Or ControlStyles.UserPaint Or ControlStyles.AllPaintingInWmPaint, True)
+        pnl_ieditor.Dock = DockStyle.Fill
+        pnl_oeditor.Dock = DockStyle.Fill
+        RECENT_Load()
+        PopulateComboBoxTypes()
         PopulateData()
     End Sub
     Private Sub Form1_DragDrop(sender As Object, e As DragEventArgs) Handles Me.DragDrop
@@ -75,13 +72,13 @@ Public Class Form1
             End If
         End If
     End Sub
-    Sub clear_recent_files()
+    Sub RECENT_Clear()
         If My.Settings.recent_files Is Nothing Then Exit Sub
         My.Settings.recent_files.Clear()
         My.Settings.Save()
-        set_recent_files()
+        RECENT_Load()
     End Sub
-    Sub set_recent_files()
+    Sub RECENT_Load()
         men_open_recent.DropDownItems.Clear()
         If My.Settings.recent_files Is Nothing Then
             men_open_recent.Visible = False
@@ -97,13 +94,13 @@ Public Class Form1
                             My.Settings.recent_files.Remove(f)
                         End While
                         My.Settings.Save()
-                        set_recent_files()
+                        RECENT_Load()
                     End If
                 End Sub
             men_open_recent.DropDownItems.Add(men)
         Next
         Dim clear As New ToolStripMenuItem With {.Text = "Clear"}
-        AddHandler clear.Click, Sub() clear_recent_files()
+        AddHandler clear.Click, Sub() RECENT_Clear()
         men_open_recent.DropDownItems.Add(clear)
 
         If men_open_recent.DropDownItems.Count > 1 Then
@@ -113,7 +110,7 @@ Public Class Form1
         End If
     End Sub
 
-    Sub add_recent_file(f As String)
+    Sub RECENT_Add(f As String)
         If My.Settings.recent_files Is Nothing Then
             My.Settings.recent_files = New Specialized.StringCollection
         End If
@@ -127,25 +124,26 @@ Public Class Form1
             Next
         End If
         My.Settings.Save()
-        set_recent_files()
+        RECENT_Load()
     End Sub
     Sub LoadFile(f As String)
         SetData(File.ReadAllText(f))
         FILENAME = f
-        add_recent_file(f)
+        RECENT_Add(f)
     End Sub
     Sub SetData(data As String)
         Try
             TRACK.Parse(data)
         Catch ex As Exception
             MsgBox("Failed to parse this file as a MelodyTrack")
+            Throw ex
             Exit Sub
         End Try
 
-        SetDataFromCurrentTrack()
+        LoadData()
     End Sub
 
-    Sub SetDataFromCurrentTrack()
+    Sub LoadData()
         HISTORY.Clear()
 
         lst_intensities.MelodyTrack = TRACK
@@ -155,28 +153,27 @@ Public Class Form1
     End Sub
     Sub PopulateData()
         UpdatingSelection = True
-        txt_ver.Text = TRACK.version
-        txt_samples.Text = TRACK.samples
-        txt_dur.Text = TRACK.duration
-        txt_bpm.Text = TRACK.tempo
-        chk_34.Checked = TRACK.is_3_4
+        txt_ver.Text = TRACK.Version
+        txt_samples.Text = TRACK.Samples
+        txt_dur.Text = TRACK.Duration
+        txt_bpm.Text = TRACK.Tempo
+        chk_34.Checked = TRACK.Is34TimeSignature
         UpdatingSelection = False
 
         pnl_ieditor.Visible = False
         pnl_oeditor.Visible = False
-        LoadLists()
+
+        PopulateLists()
     End Sub
-    Function GetIntensityGroup(o As MelodyObstacle) As MelodyIntensity
-        If TRACK Is Nothing Then Return Nothing
-        If TRACK.intensities.Count = 0 Then Return Nothing
-
-        Dim ints = TRACK.intensities.Where(Function(x) x.time < o.time)
-
-        Return ints.OrderByDescending(Function(x) x.time).FirstOrDefault()
-    End Function
-    Sub LoadLists(Optional RememberSelections As Boolean = False, Optional isel As Integer = -1, Optional osel As Integer = -1)
+    Sub PopulateLists(Optional RememberSelections As Boolean = False, Optional isel As Integer = -1, Optional osel As Integer = -1)
+        ' this memory feature is a hacky solution
+        ' ideally, we do not re-make the whole list on every edit, just edit the single listbox item.
+        ' it shouldn't be too hard but i am quite lazy right now
+        ' ironic that i went through the trouble of getting and setting the scroll position through wndproc
         If isel = -1 Then isel = lst_intensities.SelectedIndex
         If osel = -1 Then osel = lst_obstacles.SelectedIndex
+        Dim iscroll = lst_intensities.VerticalScrollValue
+        Dim oscroll = lst_obstacles.VerticalScrollValue
 
         TRACK.SortLists()
         lst_intensities.PopulateData()
@@ -184,6 +181,9 @@ Public Class Form1
 
         If RememberSelections Then
             Try
+                ' set scroll first, so that if the new index is out of range, it will then scroll to it automatically
+                lst_intensities.VerticalScrollValue = iscroll
+                lst_obstacles.VerticalScrollValue = oscroll
                 lst_intensities.SelectedIndex = isel
                 lst_obstacles.SelectedIndex = osel
             Catch ex As Exception
@@ -214,43 +214,70 @@ Public Class Form1
         End If
 
         Dim i = lst_intensities.SelectedIndex
-        If TRACK Is Nothing OrElse TRACK.intensities.Count <= i Then Exit Sub
-        Dim int = TRACK.intensities(i)
+        If TRACK.Intensities.Count <= i Then
+            pnl_ieditor.Visible = False
+            Exit Sub
+        End If
+        Dim int = TRACK.Intensities(i)
 
+        ' Update Controls
         UpdatingSelection = True
-        num_itime.Value = int.time
 
-        If MelodyIntensity.TypeEnum.Keys.Contains(int.type) Then
-            Dim itype = MelodyIntensity.TypeEnum.Item(int.type)
-            If cmb_itype.Items.Contains(itype) Then
-                cmb_itype.SelectedItem = itype
-            Else
-                'this should theoretically never happen, but just in case
-                cmb_itype.Items.Add(itype)
-                cmb_itype.SelectedItem = itype
-            End If
+        ' time
+        num_itime.Value = int.Time
+
+        ' type
+        Dim ValidateType As New Action(Of Char, ComboBox)(
+            Sub(t As Char, c As ComboBox)
+                If IntensityType.Keys.Contains(t) Then
+                    Dim itype = IntensityType.Item(t)
+                    If c.Items.Contains(itype) Then
+                        c.SelectedItem = itype
+                    Else
+                        'this should theoretically never happen, but just in case
+                        c.Items.Add(itype)
+                        c.SelectedItem = itype
+                    End If
+                Else
+                    c.Text = t
+                End If
+            End Sub)
+        ValidateType(int.Type, cmb_itype)
+
+
+        ' duration
+        num_idur.Value = int.TransDuration
+
+        ' ME1 and ME2 specific
+        If int.IsME1 Then
+            ' Angel Jump is an obstacle in ME1
+            chk_iangeljump.Visible = False
+            ' ME1 has a From Type
+            LBL_ITypeFrom.Visible = True
+            cmb_itypefrom.Visible = True
+            ValidateType(int.ME1_StartType, cmb_itypefrom)
         Else
-            cmb_itype.Text = int.type
+            ' Angel Jump is an intensity in ME2
+            chk_iangeljump.Checked = int.IsAngelJump
+            chk_iangeljump.Visible = True
+            ' There is no From Type in ME2
+            LBL_ITypeFrom.Visible = False
+            cmb_itypefrom.Visible = False
         End If
 
-        num_idur.Value = int.trans_duration
-
-        If Not String.IsNullOrWhiteSpace(int.has_a) Then
-            txt_ia.Text = int.has_a
-        Else
-            txt_ia.Text = ""
-        End If
         UpdatingSelection = False
+        ' Finished Updating
 
+        ' temp music sync
         If Not String.IsNullOrWhiteSpace(AxWindowsMediaPlayer1.URL) Then
             AxWindowsMediaPlayer1.Ctlcontrols.stop()
-            AxWindowsMediaPlayer1.Ctlcontrols.currentPosition = ToSeconds(int.time)
+            AxWindowsMediaPlayer1.Ctlcontrols.currentPosition = ToSeconds(int.Time)
             AxWindowsMediaPlayer1.Ctlcontrols.play()
         End If
 
+        ' set editor as visible
         pnl_ieditor.Visible = True
     End Sub
-    Dim aaa = 0
     Private Sub lst_obstacles_SelectedIndexChanged(sender As Object, e As EventArgs) Handles lst_obstacles.SelectedIndexChanged
         If lst_obstacles.SelectedIndex = -1 Then
             pnl_oeditor.Visible = False
@@ -266,14 +293,21 @@ Public Class Form1
         End If
 
         Dim i = lst_obstacles.SelectedIndex
-        If TRACK Is Nothing OrElse TRACK.obstacles.Count <= i Then Exit Sub
-        Dim o = TRACK.obstacles(i)
+        If TRACK.Obstacles.Count <= i Then
+            pnl_oeditor.Visible = False
+            Exit Sub
+        End If
+        Dim o = TRACK.Obstacles(i)
 
+        ' Updating Controls
         UpdatingSelection = True
-        num_otime.Value = o.time
 
-        If MelodyObstacle.ObstacleType.Keys.Contains(o.type) Then
-            Dim otype = MelodyObstacle.ObstacleType.Item(o.type)
+        ' time
+        num_otime.Value = o.Time
+
+        ' type
+        If ObstacleType.Keys.Contains(o.Type) Then
+            Dim otype = ObstacleType.Item(o.Type)
             If cmb_otype.Items.Contains(otype) Then
                 cmb_otype.SelectedItem = otype
             Else
@@ -282,26 +316,31 @@ Public Class Form1
                 cmb_otype.SelectedItem = otype
             End If
         Else
-            cmb_otype.Text = o.type
+            cmb_otype.Text = o.Type
         End If
 
-        If o.duration > -1 Then
+        ' is hold & hold duration
+        If o.IsHold Then
             chk_odur.Checked = True
-            num_odur.Value = o.duration
+            num_odur.Value = o.HoldDuration
         Else
             chk_odur.Checked = False
             num_odur.Value = 0
         End If
-        UpdatingSelection = False
 
+        ' ME1 uses type A to determine angel jump, it is not an additional property
+
+        UpdatingSelection = False
+        ' Finished Updating
+
+        ' temp music sync
         If Not String.IsNullOrWhiteSpace(AxWindowsMediaPlayer1.URL) Then
             AxWindowsMediaPlayer1.Ctlcontrols.stop()
-            AxWindowsMediaPlayer1.Ctlcontrols.currentPosition = ToSeconds(o.time)
+            AxWindowsMediaPlayer1.Ctlcontrols.currentPosition = ToSeconds(o.Time)
             AxWindowsMediaPlayer1.Ctlcontrols.play()
         End If
 
-
-
+        ' set editor as visible
         pnl_oeditor.Visible = True
     End Sub
 
@@ -338,10 +377,10 @@ Public Class Form1
                 ADD_HISTORY(String.Format("Delete {0} Obstacle{1}", ilist.Count, If(ilist.Count = 1, "", "s")))
 
                 For i = 0 To ilist.Count - 1
-                    TRACK.obstacles.RemoveAt(ilist(i) - i)
+                    TRACK.Obstacles.RemoveAt(ilist(i) - i)
                 Next
 
-                LoadLists()
+                PopulateLists()
             End If
         End If
     End Sub
@@ -357,10 +396,10 @@ Public Class Form1
                 ADD_HISTORY(String.Format("Delete {0} Intensit{1}", ilist.Count, If(ilist.Count = 1, "y", "ies")))
 
                 For i = 0 To ilist.Count - 1
-                    TRACK.intensities.RemoveAt(ilist(i) - i)
+                    TRACK.Intensities.RemoveAt(ilist(i) - i)
                 Next
 
-                LoadLists(True)
+                PopulateLists(True)
             End If
         End If
     End Sub
@@ -368,108 +407,117 @@ Public Class Form1
     Private Sub num_itime_ValueChanged(sender As Object, e As EventArgs) Handles num_itime.ValueChanged
         If UpdatingSelection Then Exit Sub
         ADD_HISTORY("Change Intensity Time")
-        Dim i = TRACK.intensities(lst_intensities.SelectedIndex)
-        i.time = num_itime.Value
+        Dim i = TRACK.Intensities(lst_intensities.SelectedIndex)
+        i.Time = num_itime.Value
         TRACK.SortLists()
-        LoadLists(True, TRACK.intensities.IndexOf(i))
+        PopulateLists(True, TRACK.Intensities.IndexOf(i))
     End Sub
 
     Private Sub cmb_itype_TextChanged(sender As Object, e As EventArgs) Handles cmb_itype.TextChanged
         If UpdatingSelection Then Exit Sub
         ADD_HISTORY("Change Intensity Type")
 
-        Dim itype = cmb_itype.Text
-        Dim i = MelodyIntensity.TypeEnum.Values.ToList().IndexOf(itype)
-        If i <> -1 Then
-            itype = MelodyIntensity.TypeEnum.Keys(i)
-        End If
+        Dim itype = MelodyIntensity.ValidateType(cmb_itype.Text)
 
-        TRACK.intensities(lst_intensities.SelectedIndex).type = itype
+        TRACK.Intensities(lst_intensities.SelectedIndex).Type = itype
         Dim sel = cmb_itype.SelectionStart
-        LoadLists(True)
+        PopulateLists(True)
         cmb_itype.SelectionStart = sel
+    End Sub
+
+    Private Sub cmb_itypefrom_TextChanged(sender As Object, e As EventArgs) Handles cmb_itypefrom.TextChanged
+        If UpdatingSelection Then Exit Sub
+        ADD_HISTORY("Change Intensity From Type")
+
+        Dim itype = MelodyIntensity.ValidateType(cmb_itypefrom.Text)
+        TRACK.Intensities(lst_intensities.SelectedIndex).ME1_StartType = itype
+        Dim sel = cmb_itypefrom.SelectionStart
+        PopulateLists(True)
+        cmb_itypefrom.SelectionStart = sel
     End Sub
 
     Private Sub num_idur_ValueChanged(sender As Object, e As EventArgs) Handles num_idur.ValueChanged
         If UpdatingSelection Then Exit Sub
         ADD_HISTORY("Change Intensity Duration")
-        TRACK.intensities(lst_intensities.SelectedIndex).trans_duration = num_idur.Value
-        LoadLists(True)
+        TRACK.Intensities(lst_intensities.SelectedIndex).TransDuration = num_idur.Value
+        PopulateLists(True)
     End Sub
 
-    Private Sub txt_ia_TextChanged(sender As Object, e As EventArgs) Handles txt_ia.TextChanged
+    Private Sub chk_iangeljump_CheckedChanged(sender As Object, e As EventArgs) Handles chk_iangeljump.CheckedChanged
         If UpdatingSelection Then Exit Sub
-        ADD_HISTORY("Change Intensity Slowmo")
-        TRACK.intensities(lst_intensities.SelectedIndex).has_a = txt_ia.Text
-        Dim sel = txt_ia.SelectionStart
-        LoadLists(True)
-        txt_ia.SelectionStart = sel
+        ADD_HISTORY("Toggle Intensity Angel Jump")
+        TRACK.Intensities(lst_intensities.SelectedIndex).IsAngelJump = chk_iangeljump.Checked
+        PopulateLists(True)
     End Sub
 
     Private Sub num_otime_ValueChanged(sender As Object, e As EventArgs) Handles num_otime.ValueChanged
         If UpdatingSelection Then Exit Sub
         ADD_HISTORY("Change Obstacle Time")
-        Dim o = TRACK.obstacles(lst_obstacles.SelectedIndex)
-        o.time = num_otime.Value
+        Dim o = TRACK.Obstacles(lst_obstacles.SelectedIndex)
+        o.Time = num_otime.Value
         TRACK.SortLists()
-        LoadLists(True, osel:=TRACK.obstacles.IndexOf(o))
+        PopulateLists(True, osel:=TRACK.Obstacles.IndexOf(o))
     End Sub
 
     Private Sub cmb_otype_TextChanged(sender As Object, e As EventArgs) Handles cmb_otype.TextChanged
         If UpdatingSelection Then Exit Sub
         ADD_HISTORY("Change Obstacle Type")
 
-        Dim otype = cmb_otype.Text
-        Dim o = MelodyObstacle.ObstacleType_GetKey(otype)
-        If Not String.IsNullOrWhiteSpace(o) Then otype = o
+        Dim otype = MelodyObstacle.ValidateType(cmb_otype.Text)
 
-        TRACK.obstacles(lst_obstacles.SelectedIndex).type = otype
+        TRACK.Obstacles(lst_obstacles.SelectedIndex).Type = otype
         Dim sel = cmb_otype.SelectionStart
-        LoadLists(True)
+        PopulateLists(True)
         cmb_otype.SelectionStart = sel
     End Sub
 
     Private Sub chk_odur_CheckedChanged(sender As Object, e As EventArgs) Handles chk_odur.CheckedChanged
         If UpdatingSelection Then Exit Sub
-        ADD_HISTORY("Change Obstacle Duration")
+        ADD_HISTORY("Toggle Obstacle Hold Duration")
         If chk_odur.Checked Then
-            TRACK.obstacles(lst_obstacles.SelectedIndex).duration = num_odur.Value
+            TRACK.Obstacles(lst_obstacles.SelectedIndex).IsHold = True
+            TRACK.Obstacles(lst_obstacles.SelectedIndex).HoldDuration = num_odur.Value
         Else
-            TRACK.obstacles(lst_obstacles.SelectedIndex).duration = -1
+            TRACK.Obstacles(lst_obstacles.SelectedIndex).IsHold = False
         End If
-        LoadLists(True)
+        PopulateLists(True)
     End Sub
 
     Private Sub num_odur_ValueChanged(sender As Object, e As EventArgs) Handles num_odur.ValueChanged
         If UpdatingSelection Then Exit Sub
         If chk_odur.Checked Then
-            ADD_HISTORY("Change Obstacle Duration")
-            TRACK.obstacles(lst_obstacles.SelectedIndex).duration = num_odur.Value
-            LoadLists(True)
+            ADD_HISTORY("Change Obstacle Hold Duration")
+            TRACK.Obstacles(lst_obstacles.SelectedIndex).HoldDuration = num_odur.Value
+            PopulateLists(True)
         End If
     End Sub
 
-    Sub UpdateAppDataFiles()
-        men_open_appdata.DropDownItems.Clear()
-
-        Dim appdata = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "Low"
-        Dim p = Path.Combine(appdata, "Icetesy", "Melody's Escape 2", "Tracks Cache")
-        If Not Directory.Exists(p) Then
-            men_open_appdata.Visible = False
-            Exit Sub
-        End If
-        men_open_appdata.Visible = True
-        For Each f In Directory.GetFiles(p)
-            Dim menu As New ToolStripMenuItem With {.Text = Path.GetFileNameWithoutExtension(f)}
-            AddHandler menu.Click,
+    Sub AddTrackCacheFiles(MenuItem As ToolStripMenuItem, Dir As String)
+        MenuItem.DropDownItems.Clear()
+        If Directory.Exists(Dir) Then
+            Dim files = Directory.GetFiles(Dir)
+            If files.Length > 0 Then MenuItem.Visible = True
+            For Each f In Directory.GetFiles(Dir)
+                Dim menu As New ToolStripMenuItem With {.Text = Path.GetFileNameWithoutExtension(f)}
+                AddHandler menu.Click,
                     Sub()
                         LoadFile(f)
                     End Sub
-            men_open_appdata.DropDownItems.Add(menu)
-        Next
+                MenuItem.DropDownItems.Add(menu)
+            Next
+        Else
+            MenuItem.Visible = False
+        End If
     End Sub
-
-    Private Sub FileToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles FileToolStripMenuItem.DropDownOpening
+    Sub UpdateAppDataFiles()
+        Dim appdata = GetFolderPath(SpecialFolder.LocalApplicationData) + "Low"
+        Dim p = Path.Combine(appdata, "Icetesy", "Melody's Escape 2", "Tracks Cache")
+        AddTrackCacheFiles(men_open_appdata, p)
+        appdata = GetFolderPath(SpecialFolder.ApplicationData)
+        p = Path.Combine(appdata, "MelodyEscape", "TracksCache")
+        AddTrackCacheFiles(men_open_appdata_me1, p)
+    End Sub
+    Private Sub FileToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles MenuFile.DropDownOpening
         UpdateAppDataFiles()
     End Sub
 
@@ -478,40 +526,38 @@ Public Class Form1
     End Sub
 
     Private Sub men_add_beat_Click(sender As Object, e As EventArgs) Handles men_add_beat.Click
-        If TRACK Is Nothing Then
-            MsgBox("No TRACK created yet.")
-            Exit Sub
-        End If
-
-        '1238
-        Dim length = InputBox("How many qbeats is this beat playing for? 4 is 1 beat.")
-        If String.IsNullOrWhiteSpace(length) Then Exit Sub
-        Dim num = InputBox("How many obstacles do you want? (make this the same as before for a qbeat pattern)")
-        If String.IsNullOrWhiteSpace(num) Then Exit Sub
-        Dim start = InputBox("When should it start? (In samples)")
-        If String.IsNullOrWhiteSpace(start) Then Exit Sub
-        Dim pattern = InputBox("Pattern? Blank = Cancel, Default is 4")
-        If String.IsNullOrWhiteSpace(pattern) Then Exit Sub
-
-        If String.IsNullOrWhiteSpace(pattern) Then pattern = "4"
+        Dim Queries = {
+            "How many qbeats is this beat playing for? 4 is 1 beat.",
+            "How many obstacles do you want? (make this the same as before for a qbeat pattern)",
+            "When should it start? (In samples)",
+            "Pattern? Leave Blank will CANCEL, type 8 for default"
+        }
+        Dim Answers As New List(Of String)()
+        For Each q In Queries
+            Dim a = InputBox(q)
+            If String.IsNullOrWhiteSpace(a) Then Exit Sub
+            Answers.Add(a)
+        Next
+        Dim length = Answers(0)
+        Dim num = Answers(1)
+        Dim start = Answers(2)
+        Dim pattern = Answers(3)
 
         Dim beat_dist = length / num * QBeat()
 
         Dim pi = 0
         For i = 0 To num - 1
             Dim o As New MelodyObstacle With {
-                .type = pattern(pi),
-                .time = start + beat_dist * i,
-                .duration = -1
+                .Type = pattern(pi),
+                .Time = start + beat_dist * i
             }
-            TRACK.obstacles.Add(o)
-            'lst_obstacles.Items.Add(o.ToNiceString())
+            TRACK.Obstacles.Add(o)
             pi = (pi + 1) Mod pattern.Length
         Next
-        LoadLists()
+        PopulateLists()
     End Sub
     Sub save()
-        If TRACK Is Nothing OrElse String.IsNullOrWhiteSpace(FILENAME) Then
+        If String.IsNullOrWhiteSpace(FILENAME) Then
             save_as()
             Exit Sub
         End If
@@ -523,14 +569,10 @@ Public Class Form1
         File.WriteAllText(f, TRACK.ToString())
     End Sub
     Sub save_as()
-        If TRACK Is Nothing Then
-            MsgBox("There is nothing to save.")
-            Exit Sub
-        End If
         If DIALOG_SAVE.ShowDialog() = DialogResult.OK Then
             save_file(DIALOG_SAVE.FileName)
             FILENAME = DIALOG_SAVE.FileName
-            add_recent_file(FILENAME)
+            RECENT_Add(FILENAME)
         End If
     End Sub
     Private Sub men_save_Click(sender As Object, e As EventArgs) Handles men_save.Click
@@ -538,12 +580,6 @@ Public Class Form1
     End Sub
     Private Sub men_save_as_Click(sender As Object, e As EventArgs) Handles men_save_as.Click
         save_as()
-    End Sub
-
-    Private Sub men_new_Click(sender As Object, e As EventArgs) Handles men_new.Click
-        TRACK.ParseNew()
-        SetDataFromCurrentTrack()
-        FILENAME = Nothing
     End Sub
     Function EnsureTextBoxDigits(txt As TextBox, property_name As String, og_value As Object) As Boolean
         If Integer.TryParse(txt.Text, Nothing) Then Return True
@@ -560,53 +596,40 @@ Public Class Form1
 
     Private Sub txt_ver_TextChanged(sender As Object, e As EventArgs) Handles txt_ver.TextChanged
         If UpdatingSelection Then Exit Sub
-        If TRACK Is Nothing Then Exit Sub
-        If Not EnsureTextBoxDecimal(txt_ver, "TRACK Version", TRACK.version) Then Exit Sub
+        If Not EnsureTextBoxDecimal(txt_ver, "TRACK Version", TRACK.Version) Then Exit Sub
         ADD_HISTORY("Change Version")
-        TRACK.version = txt_ver.Text
+        TRACK.Version = txt_ver.Text
     End Sub
 
     Private Sub txt_samples_TextChanged(sender As Object, e As EventArgs) Handles txt_samples.TextChanged
         If UpdatingSelection Then Exit Sub
-        If TRACK Is Nothing Then Exit Sub
-        If Not EnsureTextBoxDigits(txt_samples, "TRACK Samples", TRACK.samples) Then Exit Sub
-        TRACK.samples = txt_samples.Text
+        If Not EnsureTextBoxDigits(txt_samples, "TRACK Samples", TRACK.Samples) Then Exit Sub
+        TRACK.Samples = txt_samples.Text
     End Sub
 
     Private Sub txt_dur_TextChanged(sender As Object, e As EventArgs) Handles txt_dur.TextChanged
         If UpdatingSelection Then Exit Sub
-        If TRACK Is Nothing Then Exit Sub
-        If Not EnsureTextBoxDecimal(txt_dur, "TRACK Duration", TRACK.duration) Then Exit Sub
-        TRACK.duration = txt_dur.Text
+        If Not EnsureTextBoxDecimal(txt_dur, "TRACK Duration", TRACK.Duration) Then Exit Sub
+        TRACK.Duration = txt_dur.Text
     End Sub
 
     Private Sub txt_bpm_TextChanged(sender As Object, e As EventArgs) Handles txt_bpm.TextChanged
         If UpdatingSelection Then Exit Sub
-        If TRACK Is Nothing Then Exit Sub
-        If Not EnsureTextBoxDigits(txt_bpm, "TRACK Tempo (BPM)", TRACK.tempo) Then Exit Sub
-        TRACK.tempo = txt_bpm.Text
+        If Not EnsureTextBoxDigits(txt_bpm, "TRACK Tempo (BPM)", TRACK.Tempo) Then Exit Sub
+        TRACK.Tempo = txt_bpm.Text
     End Sub
 
     Private Sub chk_34_CheckedChanged(sender As Object, e As EventArgs) Handles chk_34.CheckedChanged
         If UpdatingSelection Then Exit Sub
-        If TRACK Is Nothing Then Exit Sub
-        TRACK.is_3_4 = chk_34.Checked
+        TRACK.Is34TimeSignature = chk_34.Checked
     End Sub
 
-    Private Sub UndoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles UndoToolStripMenuItem.Click
+    Private Sub MenuEdit_Undo_Click(sender As Object, e As EventArgs) Handles MenuEdit_Undo.Click
         UNDO()
     End Sub
 
-    Private Sub RedoToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles RedoToolStripMenuItem.Click
+    Private Sub MenuEdit_Redo_Click(sender As Object, e As EventArgs) Handles MenuEdit_Redo.Click
         REDO()
-    End Sub
-
-    Private Sub btn_tool_setslow_Click(sender As Object, e As EventArgs) Handles btn_tool_setslow.Click
-        txt_ia.Text = "A"
-    End Sub
-
-    Private Sub btn_tool_slowclear_Click(sender As Object, e As EventArgs) Handles btn_tool_slowclear.Click
-        txt_ia.Text = ""
     End Sub
 
     Private Sub btn_tool_itimeplus_Click(sender As Object, e As EventArgs) Handles btn_tool_itimeplus.Click
@@ -677,29 +700,27 @@ Public Class Form1
     End Sub
 
     Private Sub menu_add_intensity_Click(sender As Object, e As EventArgs) Handles menu_add_intensity.Click
-        If TRACK Is Nothing Then Exit Sub
-        If TRACK.intensities Is Nothing Then Exit Sub
-
-        TRACK.intensities.Add(New MelodyIntensity With {.type = "L", .time = TRACK.intensities.Last().time + 1, .trans_duration = 20})
-        LoadLists()
+        TRACK.Intensities.Add(New MelodyIntensity With {.Type = "L", .Time = TRACK.Intensities.Last().Time + 1, .TransDuration = 20})
+        PopulateLists()
     End Sub
 
     Dim wmpTimer As Timer
-    Private Sub btn_LoadAudio_Click(sender As Object, e As EventArgs) Handles btn_LoadAudio.Click
-        Dim fn = InputBox("Filename")
-        If Not File.Exists(fn) Then Exit Sub
-
+    Sub LoadMusic(Filename As String)
         wmpTimer = New Timer With {.Interval = 100}
         AddHandler wmpTimer.Tick,
             Sub()
-                txt_audio_samples.Text = ToSamples(AxWindowsMediaPlayer1.Ctlcontrols.currentPosition)
+                'txt_audio_samples.Text = ToSamples(AxWindowsMediaPlayer1.Ctlcontrols.currentPosition)
             End Sub
         AxWindowsMediaPlayer1.settings.autoStart = False
-        AxWindowsMediaPlayer1.URL = fn
+        AxWindowsMediaPlayer1.URL = Filename
         AxWindowsMediaPlayer1.Ctlcontrols.play()
-
     End Sub
-
+    Sub UnloadMusic()
+        AxWindowsMediaPlayer1.Ctlcontrols.stop()
+        AxWindowsMediaPlayer1.URL = ""
+        AxWindowsMediaPlayer1.currentPlaylist.clear()
+        wmpTimer = Nothing
+    End Sub
     Private Sub AxWindowsMediaPlayer1_StatusChange(sender As Object, e As EventArgs) Handles AxWindowsMediaPlayer1.StatusChange
         If AxWindowsMediaPlayer1.playState = WMPLib.WMPPlayState.wmppsPlaying Then
             wmpTimer.Start()
@@ -707,26 +728,105 @@ Public Class Form1
             wmpTimer.Stop()
         End If
     End Sub
-
-    Private Sub btn_audio_stop_Click(sender As Object, e As EventArgs) Handles btn_audio_stop.Click
-        AxWindowsMediaPlayer1.Ctlcontrols.stop()
-    End Sub
-    Private Sub EditToolStripMenuItem_DropDownOpening(sender As Object, e As EventArgs) Handles EditToolStripMenuItem.DropDownOpening
+    Private Sub MenuEdit_DropDownOpening(sender As Object, e As EventArgs) Handles MenuEdit.DropDownOpening
         Dim u = HISTORY.GetUndoDescriptions()
         Dim r = HISTORY.GetRedoDescriptions()
         If u.Length > 0 Then
-            UndoToolStripMenuItem.Text = String.Format("Undo '{0}'", u(0))
-            UndoToolStripMenuItem.Enabled = True
+            MenuEdit_Undo.Text = String.Format("Undo '{0}'", u(0))
+            MenuEdit_Undo.Enabled = True
         Else
-            UndoToolStripMenuItem.Text = "Undo"
-            UndoToolStripMenuItem.Enabled = False
+            MenuEdit_Undo.Text = "Undo"
+            MenuEdit_Undo.Enabled = False
         End If
         If r.Length > 0 Then
-            RedoToolStripMenuItem.Text = String.Format("Redo '{0}'", r(0))
-            RedoToolStripMenuItem.Enabled = True
+            MenuEdit_Redo.Text = String.Format("Redo '{0}'", r(0))
+            MenuEdit_Redo.Enabled = True
         Else
-            RedoToolStripMenuItem.Text = "Redo"
-            RedoToolStripMenuItem.Enabled = False
+            MenuEdit_Redo.Text = "Redo"
+            MenuEdit_Redo.Enabled = False
         End If
     End Sub
+
+    Private Sub MenuMusic_SmartOpen_Click(sender As Object, e As EventArgs) Handles MenuMusic_SmartOpen.Click
+        Dim song = Path.GetFileNameWithoutExtension(FILENAME)
+        If song.EndsWith("_2") Then song = song.Substring(0, song.Length - 2)
+        If song.StartsWith("EP") Then song = song.Substring(5, song.Length - 5)
+        If song.StartsWith("TEMPO") Then song = song.Substring(8, song.Length - 5)
+
+        Dim FoundFile As String = ""
+        Dim SearchDirectory As New Action(Of String)(
+            Sub(SearchString As String)
+                Dim files As String()
+                Try
+                    files = Directory.GetFiles(SearchString)
+                Catch ex As Exception
+                    Exit Sub
+                End Try
+                Dim filtered = files.Where(Function(a) a.Contains(song) AndAlso Not a.ToLower().EndsWith(".txt") AndAlso Not a.ToLower().EndsWith(".track")).ToArray()
+                If filtered.Length > 0 Then
+                    FoundFile = filtered(0)
+                    Exit Sub
+                End If
+                For Each d In Directory.GetDirectories(SearchString)
+                    SearchDirectory(d)
+                Next
+            End Sub)
+
+        Dim dir = GetFolderPath(SpecialFolder.MyMusic)
+        If Directory.Exists(dir) Then
+            SearchDirectory(dir)
+
+        End If
+
+        If Not String.IsNullOrWhiteSpace(FoundFile) AndAlso File.Exists(FoundFile) Then
+            LoadMusic(FoundFile)
+            Exit Sub
+        End If
+
+        MsgBox("Song wasn't found in your Music folder, we're going to scan your whole god dang file system now heheheeh")
+        Dim FullSearch As New Action(
+            Sub()
+                For Each d In My.Computer.FileSystem.Drives
+                    SearchDirectory(d.Name)
+                Next
+            End Sub)
+
+        Dim bgw As New ComponentModel.BackgroundWorker
+        AddHandler bgw.DoWork, Sub() FullSearch()
+        AddHandler bgw.RunWorkerCompleted,
+            Sub()
+                Cursor = Cursors.Default
+                If Not String.IsNullOrWhiteSpace(FoundFile) AndAlso File.Exists(FoundFile) Then
+                    LoadMusic(FoundFile)
+                    Exit Sub
+                End If
+
+                MsgBox("Could not find this file, ANYWHERE, on your system. Is it on an external drive that isn't connected?")
+            End Sub
+
+        Cursor = Cursors.WaitCursor
+        bgw.RunWorkerAsync()
+    End Sub
+
+    Private Sub MenuMusic_DropDownOpening(sender As Object, e As EventArgs) Handles MenuMusic.DropDownOpening
+        MenuMusic_SmartOpen.Visible = Not String.IsNullOrWhiteSpace(FILENAME)
+        MenuMusic_Unload.Visible = Not String.IsNullOrWhiteSpace(AxWindowsMediaPlayer1.URL) AndAlso File.Exists(AxWindowsMediaPlayer1.URL)
+    End Sub
+
+    Private Sub MenuMusic_Unload_Click(sender As Object, e As EventArgs) Handles MenuMusic_Unload.Click
+        UnloadMusic()
+    End Sub
+
+    Private Sub MenuFile_New_ME2_Click(sender As Object, e As EventArgs) Handles MenuFile_New_ME2.Click
+        TRACK.ParseNewME2()
+        LoadData()
+        FILENAME = Nothing
+    End Sub
+    Private Sub MenuFile_New_ME1_Click(sender As Object, e As EventArgs) Handles MenuFile_New_ME1.Click
+        TRACK.ParseNewME1()
+        LoadData()
+        FILENAME = Nothing
+    End Sub
+
+
 End Class

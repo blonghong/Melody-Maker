@@ -29,20 +29,19 @@ Partial Class Form1
         Me.txt_bpm = New System.Windows.Forms.TextBox()
         Me.chk_34 = New System.Windows.Forms.CheckBox()
         Me.pnl_ieditor = New System.Windows.Forms.Panel()
+        Me.LBL_ITypeFrom = New System.Windows.Forms.Label()
+        Me.cmb_itypefrom = New System.Windows.Forms.ComboBox()
+        Me.chk_iangeljump = New System.Windows.Forms.CheckBox()
         Me.btn_tool_idur50 = New System.Windows.Forms.Button()
         Me.btn_tool_idur30 = New System.Windows.Forms.Button()
         Me.btn_tool_idur20 = New System.Windows.Forms.Button()
         Me.btn_tool_idur15 = New System.Windows.Forms.Button()
         Me.btn_tool_idur10 = New System.Windows.Forms.Button()
-        Me.Label4 = New System.Windows.Forms.Label()
         Me.Label3 = New System.Windows.Forms.Label()
         Me.Label2 = New System.Windows.Forms.Label()
         Me.btn_tool_itimeminus = New System.Windows.Forms.Button()
         Me.btn_tool_itimeplus = New System.Windows.Forms.Button()
-        Me.btn_tool_slowclear = New System.Windows.Forms.Button()
-        Me.btn_tool_setslow = New System.Windows.Forms.Button()
         Me.num_idur = New System.Windows.Forms.NumericUpDown()
-        Me.txt_ia = New System.Windows.Forms.TextBox()
         Me.cmb_itype = New System.Windows.Forms.ComboBox()
         Me.num_itime = New System.Windows.Forms.NumericUpDown()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -61,34 +60,38 @@ Partial Class Form1
         Me.cmb_otype = New System.Windows.Forms.ComboBox()
         Me.num_otime = New System.Windows.Forms.NumericUpDown()
         Me.MenuStrip1 = New System.Windows.Forms.MenuStrip()
-        Me.FileToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.men_new = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuFile = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuFile_New = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuFile_New_ME2 = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuFile_New_ME1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_open = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_open_recent = New System.Windows.Forms.ToolStripMenuItem()
+        Me.men_open_appdata_me1 = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_open_appdata = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator2 = New System.Windows.Forms.ToolStripSeparator()
         Me.men_save = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_save_as = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripSeparator1 = New System.Windows.Forms.ToolStripSeparator()
         Me.men_exit = New System.Windows.Forms.ToolStripMenuItem()
-        Me.EditToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.UndoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.RedoToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuMusic = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuMusic_Open = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuMusic_SmartOpen = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuMusic_Unload = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuEdit = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuEdit_Undo = New System.Windows.Forms.ToolStripMenuItem()
+        Me.MenuEdit_Redo = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.men_add_beat = New System.Windows.Forms.ToolStripMenuItem()
         Me.menu_add_intensity = New System.Windows.Forms.ToolStripMenuItem()
-        Me.TestToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.Label7 = New System.Windows.Forms.Label()
         Me.Label8 = New System.Windows.Forms.Label()
         Me.Label9 = New System.Windows.Forms.Label()
         Me.Label10 = New System.Windows.Forms.Label()
-        Me.btn_LoadAudio = New System.Windows.Forms.Button()
-        Me.txt_audio_samples = New System.Windows.Forms.TextBox()
-        Me.Label11 = New System.Windows.Forms.Label()
-        Me.btn_audio_stop = New System.Windows.Forms.Button()
         Me.AxWindowsMediaPlayer1 = New AxWMPLib.AxWindowsMediaPlayer()
         Me.lst_obstacles = New Melody_Maker.MelodyListBox()
         Me.lst_intensities = New Melody_Maker.MelodyListBox()
+        Me.BetterSplitContainer1 = New Melody_Maker.BetterSplitContainer()
+        Me.BetterSplitContainer2 = New Melody_Maker.BetterSplitContainer()
         Me.pnl_ieditor.SuspendLayout()
         CType(Me.num_idur, System.ComponentModel.ISupportInitialize).BeginInit()
         CType(Me.num_itime, System.ComponentModel.ISupportInitialize).BeginInit()
@@ -97,6 +100,14 @@ Partial Class Form1
         CType(Me.num_otime, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.MenuStrip1.SuspendLayout()
         CType(Me.AxWindowsMediaPlayer1, System.ComponentModel.ISupportInitialize).BeginInit()
+        CType(Me.BetterSplitContainer1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.BetterSplitContainer1.Panel1.SuspendLayout()
+        Me.BetterSplitContainer1.Panel2.SuspendLayout()
+        Me.BetterSplitContainer1.SuspendLayout()
+        CType(Me.BetterSplitContainer2, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.BetterSplitContainer2.Panel1.SuspendLayout()
+        Me.BetterSplitContainer2.Panel2.SuspendLayout()
+        Me.BetterSplitContainer2.SuspendLayout()
         Me.SuspendLayout()
         '
         'txt_ver
@@ -141,28 +152,55 @@ Partial Class Form1
         '
         Me.pnl_ieditor.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.pnl_ieditor.Controls.Add(Me.LBL_ITypeFrom)
+        Me.pnl_ieditor.Controls.Add(Me.cmb_itypefrom)
+        Me.pnl_ieditor.Controls.Add(Me.chk_iangeljump)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_idur50)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_idur30)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_idur20)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_idur15)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_idur10)
-        Me.pnl_ieditor.Controls.Add(Me.Label4)
         Me.pnl_ieditor.Controls.Add(Me.Label3)
         Me.pnl_ieditor.Controls.Add(Me.Label2)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_itimeminus)
         Me.pnl_ieditor.Controls.Add(Me.btn_tool_itimeplus)
-        Me.pnl_ieditor.Controls.Add(Me.btn_tool_slowclear)
-        Me.pnl_ieditor.Controls.Add(Me.btn_tool_setslow)
         Me.pnl_ieditor.Controls.Add(Me.num_idur)
-        Me.pnl_ieditor.Controls.Add(Me.txt_ia)
         Me.pnl_ieditor.Controls.Add(Me.cmb_itype)
         Me.pnl_ieditor.Controls.Add(Me.num_itime)
         Me.pnl_ieditor.Controls.Add(Me.Label1)
-        Me.pnl_ieditor.Location = New System.Drawing.Point(351, 70)
+        Me.pnl_ieditor.Location = New System.Drawing.Point(3, 14)
         Me.pnl_ieditor.Name = "pnl_ieditor"
-        Me.pnl_ieditor.Size = New System.Drawing.Size(437, 177)
+        Me.pnl_ieditor.Size = New System.Drawing.Size(300, 177)
         Me.pnl_ieditor.TabIndex = 7
         Me.pnl_ieditor.Visible = False
+        '
+        'LBL_ITypeFrom
+        '
+        Me.LBL_ITypeFrom.AutoSize = True
+        Me.LBL_ITypeFrom.Location = New System.Drawing.Point(122, 43)
+        Me.LBL_ITypeFrom.Name = "LBL_ITypeFrom"
+        Me.LBL_ITypeFrom.Size = New System.Drawing.Size(82, 13)
+        Me.LBL_ITypeFrom.TabIndex = 22
+        Me.LBL_ITypeFrom.Text = "ME1 From Type"
+        '
+        'cmb_itypefrom
+        '
+        Me.cmb_itypefrom.FormattingEnabled = True
+        Me.cmb_itypefrom.Items.AddRange(New Object() {"Walk", "Jog", "Run", "Fly"})
+        Me.cmb_itypefrom.Location = New System.Drawing.Point(125, 57)
+        Me.cmb_itypefrom.Name = "cmb_itypefrom"
+        Me.cmb_itypefrom.Size = New System.Drawing.Size(121, 21)
+        Me.cmb_itypefrom.TabIndex = 21
+        '
+        'chk_iangeljump
+        '
+        Me.chk_iangeljump.AutoSize = True
+        Me.chk_iangeljump.Location = New System.Drawing.Point(3, 121)
+        Me.chk_iangeljump.Name = "chk_iangeljump"
+        Me.chk_iangeljump.Size = New System.Drawing.Size(81, 17)
+        Me.chk_iangeljump.TabIndex = 20
+        Me.chk_iangeljump.Text = "Angel Jump"
+        Me.chk_iangeljump.UseVisualStyleBackColor = True
         '
         'btn_tool_idur50
         '
@@ -209,15 +247,6 @@ Partial Class Form1
         Me.btn_tool_idur10.Text = "10"
         Me.btn_tool_idur10.UseVisualStyleBackColor = True
         '
-        'Label4
-        '
-        Me.Label4.AutoSize = True
-        Me.Label4.Location = New System.Drawing.Point(0, 118)
-        Me.Label4.Name = "Label4"
-        Me.Label4.Size = New System.Drawing.Size(51, 13)
-        Me.Label4.TabIndex = 14
-        Me.Label4.Text = "Flags (-A)"
-        '
         'Label3
         '
         Me.Label3.AutoSize = True
@@ -254,24 +283,6 @@ Partial Class Form1
         Me.btn_tool_itimeplus.Text = "+"
         Me.btn_tool_itimeplus.UseVisualStyleBackColor = True
         '
-        'btn_tool_slowclear
-        '
-        Me.btn_tool_slowclear.Location = New System.Drawing.Point(182, 130)
-        Me.btn_tool_slowclear.Name = "btn_tool_slowclear"
-        Me.btn_tool_slowclear.Size = New System.Drawing.Size(40, 23)
-        Me.btn_tool_slowclear.TabIndex = 8
-        Me.btn_tool_slowclear.Text = "Clear"
-        Me.btn_tool_slowclear.UseVisualStyleBackColor = True
-        '
-        'btn_tool_setslow
-        '
-        Me.btn_tool_setslow.Location = New System.Drawing.Point(125, 130)
-        Me.btn_tool_setslow.Name = "btn_tool_setslow"
-        Me.btn_tool_setslow.Size = New System.Drawing.Size(57, 23)
-        Me.btn_tool_setslow.TabIndex = 7
-        Me.btn_tool_setslow.Text = "Set Slow"
-        Me.btn_tool_setslow.UseVisualStyleBackColor = True
-        '
         'num_idur
         '
         Me.num_idur.Location = New System.Drawing.Point(3, 95)
@@ -279,13 +290,6 @@ Partial Class Form1
         Me.num_idur.Name = "num_idur"
         Me.num_idur.Size = New System.Drawing.Size(121, 20)
         Me.num_idur.TabIndex = 2
-        '
-        'txt_ia
-        '
-        Me.txt_ia.Location = New System.Drawing.Point(3, 131)
-        Me.txt_ia.Name = "txt_ia"
-        Me.txt_ia.Size = New System.Drawing.Size(121, 20)
-        Me.txt_ia.TabIndex = 6
         '
         'cmb_itype
         '
@@ -330,9 +334,9 @@ Partial Class Form1
         Me.pnl_oeditor.Controls.Add(Me.num_odur)
         Me.pnl_oeditor.Controls.Add(Me.cmb_otype)
         Me.pnl_oeditor.Controls.Add(Me.num_otime)
-        Me.pnl_oeditor.Location = New System.Drawing.Point(351, 253)
+        Me.pnl_oeditor.Location = New System.Drawing.Point(3, 197)
         Me.pnl_oeditor.Name = "pnl_oeditor"
-        Me.pnl_oeditor.Size = New System.Drawing.Size(437, 160)
+        Me.pnl_oeditor.Size = New System.Drawing.Size(300, 160)
         Me.pnl_oeditor.TabIndex = 8
         Me.pnl_oeditor.Visible = False
         '
@@ -454,26 +458,41 @@ Partial Class Form1
         '
         'MenuStrip1
         '
-        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.FileToolStripMenuItem, Me.EditToolStripMenuItem, Me.ToolsToolStripMenuItem, Me.TestToolStripMenuItem})
+        Me.MenuStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuFile, Me.MenuMusic, Me.MenuEdit, Me.ToolsToolStripMenuItem})
         Me.MenuStrip1.Location = New System.Drawing.Point(0, 0)
         Me.MenuStrip1.Name = "MenuStrip1"
-        Me.MenuStrip1.Size = New System.Drawing.Size(800, 24)
+        Me.MenuStrip1.Size = New System.Drawing.Size(698, 24)
         Me.MenuStrip1.TabIndex = 16
         Me.MenuStrip1.Text = "MenuStrip1"
         '
-        'FileToolStripMenuItem
+        'MenuFile
         '
-        Me.FileToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.men_new, Me.men_open, Me.men_open_recent, Me.men_open_appdata, Me.ToolStripSeparator2, Me.men_save, Me.men_save_as, Me.ToolStripSeparator1, Me.men_exit})
-        Me.FileToolStripMenuItem.Name = "FileToolStripMenuItem"
-        Me.FileToolStripMenuItem.Size = New System.Drawing.Size(37, 20)
-        Me.FileToolStripMenuItem.Text = "File"
+        Me.MenuFile.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuFile_New, Me.men_open, Me.men_open_recent, Me.men_open_appdata_me1, Me.men_open_appdata, Me.ToolStripSeparator2, Me.men_save, Me.men_save_as, Me.ToolStripSeparator1, Me.men_exit})
+        Me.MenuFile.Name = "MenuFile"
+        Me.MenuFile.Size = New System.Drawing.Size(37, 20)
+        Me.MenuFile.Text = "File"
         '
-        'men_new
+        'MenuFile_New
         '
-        Me.men_new.Name = "men_new"
-        Me.men_new.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
-        Me.men_new.Size = New System.Drawing.Size(195, 22)
-        Me.men_new.Text = "New"
+        Me.MenuFile_New.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuFile_New_ME2, Me.MenuFile_New_ME1})
+        Me.MenuFile_New.Name = "MenuFile_New"
+        Me.MenuFile_New.Size = New System.Drawing.Size(195, 22)
+        Me.MenuFile_New.Text = "New"
+        '
+        'MenuFile_New_ME2
+        '
+        Me.MenuFile_New_ME2.Name = "MenuFile_New_ME2"
+        Me.MenuFile_New_ME2.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
+        Me.MenuFile_New_ME2.Size = New System.Drawing.Size(193, 22)
+        Me.MenuFile_New_ME2.Text = "ME2 Track"
+        '
+        'MenuFile_New_ME1
+        '
+        Me.MenuFile_New_ME1.Name = "MenuFile_New_ME1"
+        Me.MenuFile_New_ME1.ShortcutKeys = CType(((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Alt) _
+            Or System.Windows.Forms.Keys.N), System.Windows.Forms.Keys)
+        Me.MenuFile_New_ME1.Size = New System.Drawing.Size(193, 22)
+        Me.MenuFile_New_ME1.Text = "ME1 Track"
         '
         'men_open
         '
@@ -488,11 +507,17 @@ Partial Class Form1
         Me.men_open_recent.Size = New System.Drawing.Size(195, 22)
         Me.men_open_recent.Text = "Open Recent"
         '
+        'men_open_appdata_me1
+        '
+        Me.men_open_appdata_me1.Name = "men_open_appdata_me1"
+        Me.men_open_appdata_me1.Size = New System.Drawing.Size(195, 22)
+        Me.men_open_appdata_me1.Text = "Open ME1 AppData"
+        '
         'men_open_appdata
         '
         Me.men_open_appdata.Name = "men_open_appdata"
         Me.men_open_appdata.Size = New System.Drawing.Size(195, 22)
-        Me.men_open_appdata.Text = "Open AppData"
+        Me.men_open_appdata.Text = "Open ME2 AppData"
         '
         'ToolStripSeparator2
         '
@@ -526,27 +551,52 @@ Partial Class Form1
         Me.men_exit.Size = New System.Drawing.Size(195, 22)
         Me.men_exit.Text = "Exit"
         '
-        'EditToolStripMenuItem
+        'MenuMusic
         '
-        Me.EditToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.UndoToolStripMenuItem, Me.RedoToolStripMenuItem})
-        Me.EditToolStripMenuItem.Name = "EditToolStripMenuItem"
-        Me.EditToolStripMenuItem.Size = New System.Drawing.Size(39, 20)
-        Me.EditToolStripMenuItem.Text = "Edit"
+        Me.MenuMusic.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuMusic_Open, Me.MenuMusic_SmartOpen, Me.MenuMusic_Unload})
+        Me.MenuMusic.Name = "MenuMusic"
+        Me.MenuMusic.Size = New System.Drawing.Size(51, 20)
+        Me.MenuMusic.Text = "Music"
         '
-        'UndoToolStripMenuItem
+        'MenuMusic_Open
         '
-        Me.UndoToolStripMenuItem.Name = "UndoToolStripMenuItem"
-        Me.UndoToolStripMenuItem.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
-        Me.UndoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.UndoToolStripMenuItem.Text = "Undo"
+        Me.MenuMusic_Open.Name = "MenuMusic_Open"
+        Me.MenuMusic_Open.Size = New System.Drawing.Size(137, 22)
+        Me.MenuMusic_Open.Text = "Open..."
         '
-        'RedoToolStripMenuItem
+        'MenuMusic_SmartOpen
         '
-        Me.RedoToolStripMenuItem.Name = "RedoToolStripMenuItem"
-        Me.RedoToolStripMenuItem.ShortcutKeys = CType(((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Shift) _
+        Me.MenuMusic_SmartOpen.Name = "MenuMusic_SmartOpen"
+        Me.MenuMusic_SmartOpen.Size = New System.Drawing.Size(137, 22)
+        Me.MenuMusic_SmartOpen.Text = "Smart Open"
+        '
+        'MenuMusic_Unload
+        '
+        Me.MenuMusic_Unload.Name = "MenuMusic_Unload"
+        Me.MenuMusic_Unload.Size = New System.Drawing.Size(137, 22)
+        Me.MenuMusic_Unload.Text = "Unload"
+        '
+        'MenuEdit
+        '
+        Me.MenuEdit.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.MenuEdit_Undo, Me.MenuEdit_Redo})
+        Me.MenuEdit.Name = "MenuEdit"
+        Me.MenuEdit.Size = New System.Drawing.Size(39, 20)
+        Me.MenuEdit.Text = "Edit"
+        '
+        'MenuEdit_Undo
+        '
+        Me.MenuEdit_Undo.Name = "MenuEdit_Undo"
+        Me.MenuEdit_Undo.ShortcutKeys = CType((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
+        Me.MenuEdit_Undo.Size = New System.Drawing.Size(174, 22)
+        Me.MenuEdit_Undo.Text = "Undo"
+        '
+        'MenuEdit_Redo
+        '
+        Me.MenuEdit_Redo.Name = "MenuEdit_Redo"
+        Me.MenuEdit_Redo.ShortcutKeys = CType(((System.Windows.Forms.Keys.Control Or System.Windows.Forms.Keys.Shift) _
             Or System.Windows.Forms.Keys.Z), System.Windows.Forms.Keys)
-        Me.RedoToolStripMenuItem.Size = New System.Drawing.Size(180, 22)
-        Me.RedoToolStripMenuItem.Text = "Redo"
+        Me.MenuEdit_Redo.Size = New System.Drawing.Size(174, 22)
+        Me.MenuEdit_Redo.Text = "Redo"
         '
         'ToolsToolStripMenuItem
         '
@@ -566,12 +616,6 @@ Partial Class Form1
         Me.menu_add_intensity.Name = "menu_add_intensity"
         Me.menu_add_intensity.Size = New System.Drawing.Size(147, 22)
         Me.menu_add_intensity.Text = "Intensity"
-        '
-        'TestToolStripMenuItem
-        '
-        Me.TestToolStripMenuItem.Name = "TestToolStripMenuItem"
-        Me.TestToolStripMenuItem.Size = New System.Drawing.Size(38, 20)
-        Me.TestToolStripMenuItem.Text = "test"
         '
         'Label7
         '
@@ -609,101 +653,102 @@ Partial Class Form1
         Me.Label10.TabIndex = 23
         Me.Label10.Text = "Tempo"
         '
-        'btn_LoadAudio
-        '
-        Me.btn_LoadAudio.Location = New System.Drawing.Point(288, 42)
-        Me.btn_LoadAudio.Name = "btn_LoadAudio"
-        Me.btn_LoadAudio.Size = New System.Drawing.Size(75, 23)
-        Me.btn_LoadAudio.TabIndex = 25
-        Me.btn_LoadAudio.Text = "Load Audio"
-        Me.btn_LoadAudio.UseVisualStyleBackColor = True
-        '
-        'txt_audio_samples
-        '
-        Me.txt_audio_samples.Location = New System.Drawing.Point(369, 44)
-        Me.txt_audio_samples.Name = "txt_audio_samples"
-        Me.txt_audio_samples.ReadOnly = True
-        Me.txt_audio_samples.Size = New System.Drawing.Size(125, 20)
-        Me.txt_audio_samples.TabIndex = 26
-        '
-        'Label11
-        '
-        Me.Label11.AutoSize = True
-        Me.Label11.Location = New System.Drawing.Point(366, 31)
-        Me.Label11.Name = "Label11"
-        Me.Label11.Size = New System.Drawing.Size(128, 13)
-        Me.Label11.TabIndex = 27
-        Me.Label11.Text = "Audio Position in Samples"
-        '
-        'btn_audio_stop
-        '
-        Me.btn_audio_stop.Location = New System.Drawing.Point(500, 44)
-        Me.btn_audio_stop.Name = "btn_audio_stop"
-        Me.btn_audio_stop.Size = New System.Drawing.Size(40, 23)
-        Me.btn_audio_stop.TabIndex = 28
-        Me.btn_audio_stop.Text = "Stop"
-        Me.btn_audio_stop.UseVisualStyleBackColor = True
-        '
         'AxWindowsMediaPlayer1
         '
         Me.AxWindowsMediaPlayer1.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.AxWindowsMediaPlayer1.Enabled = True
-        Me.AxWindowsMediaPlayer1.Location = New System.Drawing.Point(544, 22)
+        Me.AxWindowsMediaPlayer1.Location = New System.Drawing.Point(378, 22)
         Me.AxWindowsMediaPlayer1.Name = "AxWindowsMediaPlayer1"
         Me.AxWindowsMediaPlayer1.OcxState = CType(resources.GetObject("AxWindowsMediaPlayer1.OcxState"), System.Windows.Forms.AxHost.State)
-        Me.AxWindowsMediaPlayer1.Size = New System.Drawing.Size(244, 45)
+        Me.AxWindowsMediaPlayer1.Size = New System.Drawing.Size(308, 45)
         Me.AxWindowsMediaPlayer1.TabIndex = 24
         '
         'lst_obstacles
         '
-        Me.lst_obstacles.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lst_obstacles.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lst_obstacles.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_obstacles.FormattingEnabled = True
         Me.lst_obstacles.IntegralHeight = False
         Me.lst_obstacles.ListBoxMode = Melody_Maker.MelodyListBox.MelodyListBoxMode.Obstacle
-        Me.lst_obstacles.Location = New System.Drawing.Point(175, 70)
+        Me.lst_obstacles.Location = New System.Drawing.Point(0, 0)
         Me.lst_obstacles.MelodyTrack = Nothing
         Me.lst_obstacles.Name = "lst_obstacles"
         Me.lst_obstacles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
-        Me.lst_obstacles.Size = New System.Drawing.Size(170, 368)
+        Me.lst_obstacles.Size = New System.Drawing.Size(180, 396)
         Me.lst_obstacles.TabIndex = 6
+        Me.lst_obstacles.VerticalScrollValue = 0
         '
         'lst_intensities
         '
-        Me.lst_intensities.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.lst_intensities.Dock = System.Windows.Forms.DockStyle.Fill
         Me.lst_intensities.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawVariable
         Me.lst_intensities.FormattingEnabled = True
         Me.lst_intensities.IntegralHeight = False
         Me.lst_intensities.ListBoxMode = Melody_Maker.MelodyListBox.MelodyListBoxMode.Intensity
-        Me.lst_intensities.Location = New System.Drawing.Point(12, 70)
+        Me.lst_intensities.Location = New System.Drawing.Point(0, 0)
         Me.lst_intensities.MelodyTrack = Nothing
         Me.lst_intensities.Name = "lst_intensities"
         Me.lst_intensities.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended
-        Me.lst_intensities.Size = New System.Drawing.Size(157, 368)
+        Me.lst_intensities.Size = New System.Drawing.Size(180, 396)
         Me.lst_intensities.TabIndex = 5
+        Me.lst_intensities.VerticalScrollValue = 0
+        '
+        'BetterSplitContainer1
+        '
+        Me.BetterSplitContainer1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.BetterSplitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1
+        Me.BetterSplitContainer1.Location = New System.Drawing.Point(12, 69)
+        Me.BetterSplitContainer1.Name = "BetterSplitContainer1"
+        '
+        'BetterSplitContainer1.Panel1
+        '
+        Me.BetterSplitContainer1.Panel1.Controls.Add(Me.lst_intensities)
+        Me.BetterSplitContainer1.Panel1Collapsible = False
+        '
+        'BetterSplitContainer1.Panel2
+        '
+        Me.BetterSplitContainer1.Panel2.Controls.Add(Me.BetterSplitContainer2)
+        Me.BetterSplitContainer1.Panel2Collapsible = False
+        Me.BetterSplitContainer1.Size = New System.Drawing.Size(674, 396)
+        Me.BetterSplitContainer1.SplitterDistance = 180
+        Me.BetterSplitContainer1.TabIndex = 29
+        '
+        'BetterSplitContainer2
+        '
+        Me.BetterSplitContainer2.Dock = System.Windows.Forms.DockStyle.Fill
+        Me.BetterSplitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1
+        Me.BetterSplitContainer2.Location = New System.Drawing.Point(0, 0)
+        Me.BetterSplitContainer2.Name = "BetterSplitContainer2"
+        '
+        'BetterSplitContainer2.Panel1
+        '
+        Me.BetterSplitContainer2.Panel1.Controls.Add(Me.lst_obstacles)
+        Me.BetterSplitContainer2.Panel1Collapsible = False
+        '
+        'BetterSplitContainer2.Panel2
+        '
+        Me.BetterSplitContainer2.Panel2.Controls.Add(Me.pnl_ieditor)
+        Me.BetterSplitContainer2.Panel2.Controls.Add(Me.pnl_oeditor)
+        Me.BetterSplitContainer2.Panel2Collapsible = False
+        Me.BetterSplitContainer2.Size = New System.Drawing.Size(490, 396)
+        Me.BetterSplitContainer2.SplitterDistance = 180
+        Me.BetterSplitContainer2.TabIndex = 0
         '
         'Form1
         '
         Me.AllowDrop = True
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(800, 450)
-        Me.Controls.Add(Me.btn_audio_stop)
-        Me.Controls.Add(Me.Label11)
-        Me.Controls.Add(Me.txt_audio_samples)
-        Me.Controls.Add(Me.btn_LoadAudio)
+        Me.ClientSize = New System.Drawing.Size(698, 477)
+        Me.Controls.Add(Me.BetterSplitContainer1)
         Me.Controls.Add(Me.AxWindowsMediaPlayer1)
         Me.Controls.Add(Me.Label10)
         Me.Controls.Add(Me.Label9)
         Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
-        Me.Controls.Add(Me.pnl_oeditor)
-        Me.Controls.Add(Me.pnl_ieditor)
-        Me.Controls.Add(Me.lst_obstacles)
-        Me.Controls.Add(Me.lst_intensities)
         Me.Controls.Add(Me.chk_34)
         Me.Controls.Add(Me.txt_bpm)
         Me.Controls.Add(Me.txt_dur)
@@ -724,6 +769,14 @@ Partial Class Form1
         Me.MenuStrip1.ResumeLayout(False)
         Me.MenuStrip1.PerformLayout()
         CType(Me.AxWindowsMediaPlayer1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.BetterSplitContainer1.Panel1.ResumeLayout(False)
+        Me.BetterSplitContainer1.Panel2.ResumeLayout(False)
+        CType(Me.BetterSplitContainer1, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.BetterSplitContainer1.ResumeLayout(False)
+        Me.BetterSplitContainer2.Panel1.ResumeLayout(False)
+        Me.BetterSplitContainer2.Panel2.ResumeLayout(False)
+        CType(Me.BetterSplitContainer2, System.ComponentModel.ISupportInitialize).EndInit()
+        Me.BetterSplitContainer2.ResumeLayout(False)
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -742,19 +795,18 @@ Partial Class Form1
     Friend WithEvents num_itime As NumericUpDown
     Friend WithEvents num_idur As NumericUpDown
     Friend WithEvents chk_odur As CheckBox
-    Friend WithEvents txt_ia As TextBox
     Friend WithEvents num_odur As NumericUpDown
     Friend WithEvents cmb_otype As ComboBox
     Friend WithEvents num_otime As NumericUpDown
     Friend WithEvents MenuStrip1 As MenuStrip
-    Friend WithEvents FileToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents men_new As ToolStripMenuItem
+    Friend WithEvents MenuFile As ToolStripMenuItem
+    Friend WithEvents MenuFile_New As ToolStripMenuItem
     Friend WithEvents men_open As ToolStripMenuItem
     Friend WithEvents men_open_recent As ToolStripMenuItem
     Friend WithEvents men_open_appdata As ToolStripMenuItem
-    Friend WithEvents EditToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents UndoToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents RedoToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents MenuEdit As ToolStripMenuItem
+    Friend WithEvents MenuEdit_Undo As ToolStripMenuItem
+    Friend WithEvents MenuEdit_Redo As ToolStripMenuItem
     Friend WithEvents ToolsToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents ToolStripSeparator1 As ToolStripSeparator
     Friend WithEvents men_exit As ToolStripMenuItem
@@ -762,11 +814,8 @@ Partial Class Form1
     Friend WithEvents ToolStripSeparator2 As ToolStripSeparator
     Friend WithEvents men_save As ToolStripMenuItem
     Friend WithEvents men_save_as As ToolStripMenuItem
-    Friend WithEvents btn_tool_setslow As Button
-    Friend WithEvents btn_tool_slowclear As Button
     Friend WithEvents btn_tool_itimeminus As Button
     Friend WithEvents btn_tool_itimeplus As Button
-    Friend WithEvents Label4 As Label
     Friend WithEvents Label3 As Label
     Friend WithEvents Label2 As Label
     Friend WithEvents Label1 As Label
@@ -790,9 +839,16 @@ Partial Class Form1
     Friend WithEvents Label9 As Label
     Friend WithEvents Label10 As Label
     Friend WithEvents AxWindowsMediaPlayer1 As AxWMPLib.AxWindowsMediaPlayer
-    Friend WithEvents btn_LoadAudio As Button
-    Friend WithEvents txt_audio_samples As TextBox
-    Friend WithEvents Label11 As Label
-    Friend WithEvents btn_audio_stop As Button
-    Friend WithEvents TestToolStripMenuItem As ToolStripMenuItem
+    Friend WithEvents MenuMusic As ToolStripMenuItem
+    Friend WithEvents MenuMusic_Open As ToolStripMenuItem
+    Friend WithEvents MenuMusic_SmartOpen As ToolStripMenuItem
+    Friend WithEvents men_open_appdata_me1 As ToolStripMenuItem
+    Friend WithEvents chk_iangeljump As CheckBox
+    Friend WithEvents BetterSplitContainer1 As BetterSplitContainer
+    Friend WithEvents BetterSplitContainer2 As BetterSplitContainer
+    Friend WithEvents MenuMusic_Unload As ToolStripMenuItem
+    Friend WithEvents MenuFile_New_ME2 As ToolStripMenuItem
+    Friend WithEvents MenuFile_New_ME1 As ToolStripMenuItem
+    Friend WithEvents LBL_ITypeFrom As Label
+    Friend WithEvents cmb_itypefrom As ComboBox
 End Class

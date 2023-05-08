@@ -1,5 +1,37 @@
-﻿Public Class MelodyListBox
+﻿Imports System.Runtime.InteropServices
+Public Class MelodyListBox
     Inherits ListBox
+
+    <StructLayout(LayoutKind.Sequential)>
+    Friend Structure SCROLLINFO
+        Public cbSize As UInteger
+        Public fMask As UInteger
+        Public nMin As Integer
+        Public nMax As Integer
+        Public nPage As UInteger
+        Public nPos As Integer
+        Public nTrackPos As Integer
+    End Structure
+    Private Enum SBTYPES
+        SB_HORZ = 0
+        SB_VERT = 1
+        SB_CTL = 2
+        SB_BOTH = 3
+    End Enum
+
+    Private Enum ScrollInfoMask
+        SIF_RANGE = &H1
+        SIF_PAGE = &H2
+        SIF_POS = &H4
+        SIF_DISABLENOSCROLL = &H8
+        SIF_TRACKPOS = &H10
+        SIF_ALL = SIF_RANGE + SIF_PAGE + SIF_POS + SIF_TRACKPOS
+    End Enum
+
+    <DllImport("user32.dll")>
+    Private Shared Function GetScrollInfo(ByVal hwnd As IntPtr, ByVal fnBar As Integer, ByRef lpsi As SCROLLINFO) As Boolean
+    End Function
+
 
     Enum MelodyListBoxMode
         None
@@ -39,14 +71,14 @@
         If track Is Nothing Then Exit Sub
         Select Case ListBoxMode
             Case MelodyListBoxMode.Intensity
-                If track.intensities.Count = 0 Then Exit Sub
-                For Each i In track.intensities
+                If track.Intensities.Count = 0 Then Exit Sub
+                For Each i In track.Intensities
                     Items.Add(i.ToNiceString())
                 Next
 
             Case MelodyListBoxMode.Obstacle
-                If track.obstacles.Count = 0 Then Exit Sub
-                For Each o In track.obstacles
+                If track.Obstacles.Count = 0 Then Exit Sub
+                For Each o In track.Obstacles
                     Items.Add(o.ToNiceString())
                 Next
 
@@ -74,11 +106,11 @@
             If track IsNot Nothing Then
                 Select Case ListBoxMode
                     Case MelodyListBoxMode.Intensity
-                        Dim i = track.intensities(e.Index)
+                        Dim i = track.Intensities(e.Index)
                         bc = i.GetColour()
 
                     Case MelodyListBoxMode.Obstacle
-                        Dim o = track.obstacles(e.Index)
+                        Dim o = track.Obstacles(e.Index)
                         Dim i = track.GetIntensityGroup(o)
                         If i IsNot Nothing Then bc = i.GetColour()
                 End Select
@@ -115,4 +147,29 @@
 
         MyBase.OnDrawItem(e)
     End Sub
+
+    Public Property VerticalScrollValue As Integer
+        Get
+            Dim SInfo As New SCROLLINFO With {
+                .cbSize = Marshal.SizeOf(GetType(SCROLLINFO)),
+                .fMask = CInt(ScrollInfoMask.SIF_ALL)
+            }
+            If GetScrollInfo(Handle, SBTYPES.SB_VERT, SInfo) Then
+                Return SInfo.nPos
+            End If
+            Return 0
+        End Get
+        Set(value As Integer)
+            Dim pos = Math.Min(Items.Count - 1, value)
+            If pos < 0 OrElse pos >= Items.Count Then Return
+
+            SuspendLayout()
+
+            'For i = 0 To 9 'not my code, idk why its a loop, it works though.
+            If TopIndex <> pos Then TopIndex = pos
+            'Next
+
+            ResumeLayout()
+        End Set
+    End Property
 End Class
